@@ -71,24 +71,26 @@ void get_token(){
             case '*': update_current_token("*", MULTI_TOKEN); break;
             case '/': update_current_token("/", DIV_TOKEN); break;
             case ',': update_current_token(",", COM_TOKEN); break;
+            case '=': update_current_token("=", EQUAL_TOKEN); break;
             case ':': {
                 next_char();
-                if (current_char != '=')
+                if (current_char != '=') {
+                    cursor_back();
                     goto ERROR;
+                }
                 else {
                     update_current_token(":=", ASSIGN_TOKEN);
-                    cursor_back();
                 }
                 break;
             }
             case '<': {
                 next_char();
                 if (current_char == '=')
-                    update_current_token("<=", LESS_OR_EQUAL_TOKEN);
+                    update_current_token("<=", LOWER_OR_EQUAL_TOKEN);
                 else if (current_char == '>')
                     update_current_token("<>", NOT_EQUAL_TOKEN);
                 else {
-                    update_current_token("<", LESS_TOKEN);
+                    update_current_token("<", LOWER_TOKEN);
                     cursor_back();
                 }
                 break;
@@ -129,9 +131,14 @@ void start_lexer(){
     while(!feof(file_ptr)){
         escape_whitespaces();
         get_token();
+
+        printf("%s -- %s -- %d\n", current_token->value, tokens[current_token->code], current_token->code);
+
         fprintf(output, "%s\n", tokens[current_token->code]);
-        printf("%s -- %s\n", current_token->value, tokens[current_token->code]);
+
     }
 
+    fprintf(output, "%s\n", tokens[EOF_TOKEN]);
+    fclose(output);
     close_file();
 }
